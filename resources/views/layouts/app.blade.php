@@ -33,23 +33,49 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('login') }}">Se connecter</a>
                         </li>
-                       {{-- <li class="nav-item">
-                            <a class="nav-link" href="{{ route('register') }}">S'inscrire</a>
-                        </li>--}}
                     @else
-                        <!-- Si l'utilisateur est connecté -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('cours.index') }}">Cours</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('emargements.index') }}">Présences</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('emargements.create') }}">Ajouter émargement</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('users.index') }}">Utilisateurs</a>
-                        </li>
+                        @php
+                            $user = Auth::user();
+                        @endphp
+
+                        @if($user->hasRole('admin'))
+                            <!-- Navigation pour l'ADMIN -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('cours.index') }}">Cours</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('emargements.index') }}">Présences</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('emargements.create') }}">Ajouter émargement</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('users.index') }}">Utilisateurs</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('home') }}">Accueil</a>
+                            </li>
+                            {{--<li class="nav-item">
+                                <a class="nav-link" href="{{ route('home.index') }}">Tableau de bord</a>
+                            </li>--}}
+                        @elseif($user->hasRole('professeur'))
+                            <!-- Navigation pour un PROFESSEUR -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('cours.index') }}">Mes Cours</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('emargements.index') }}">Mes Présences</a>
+                            </li>
+                        @elseif($user->hasRole('gestionnaire'))
+                            <!-- Navigation pour un GESTIONNAIRE -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('cours.index') }}">Gérer les cours</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('emargements.index') }}">Gérer les présences</a>
+                            </li>
+                        @endif
+
                         <!-- Menu de déconnexion -->
                         <li class="nav-item">
                             <form action="{{ route('logout') }}" method="POST" style="display:inline;">
@@ -62,6 +88,7 @@
             </div>
         </div>
     </nav>
+
 
     <div class="container mt-4">
         @yield('content') <!-- Contenu spécifique aux pages -->

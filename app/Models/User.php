@@ -38,4 +38,9 @@ class User extends Authenticatable
     protected $casts = [
         'password' => 'hashed',
     ];
+
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
 }

@@ -6,6 +6,8 @@ use App\Models\Cours;
 use App\Models\Salle;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Mail\CoursAjouteMail;
+use Illuminate\Support\Facades\Mail;
 
 class CoursController extends Controller
 {
@@ -33,7 +35,13 @@ class CoursController extends Controller
             'professeur_id' => 'required|exists:users,id'
         ]);
 
-        Cours::create($request->all());
+        $cours = Cours::create($request->all());
+
+        // Récupérer l'e-mail du professeur
+        $professeurEmail = $cours->professeur->email;
+
+        // Envoyer l'e-mail
+        Mail::to($professeurEmail)->send(new CoursAjouteMail($cours));
 
         return redirect()->route('cours.index')->with('success', 'Cours ajouté avec succès.');
     }

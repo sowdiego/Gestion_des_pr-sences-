@@ -6,15 +6,31 @@ use App\Models\Cours;
 use App\Models\Emargement;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\EmargementsExport;
 
 class EmargementController extends Controller
 {
 
-    public function index()
+//    public function index()
+//    {
+//        $emargements = Emargement::with('cours', 'professeur')
+//            ->orderBy('date', 'desc')
+//            ->get();
+//
+//        return view('emargements.index', compact('emargements'));
+//    }
+    public function index(Request $request)
     {
-        $emargements = Emargement::with('cours', 'professeur')
-            ->orderBy('date', 'desc')
-            ->get();
+        $query = Emargement::query();
+
+        // Filtrer par date si fourni
+        if ($request->filled('date_debut') && $request->filled('date_fin')) {
+            $query->whereBetween('date', [$request->date_debut, $request->date_fin]);
+        }
+
+        $emargements = $query->with(['professeur', 'cours'])->get();
 
         return view('emargements.index', compact('emargements'));
     }
@@ -75,6 +91,47 @@ class EmargementController extends Controller
             ->exists();
 
         return $conflictCours;
+    }
+
+
+    public function export(Request $request, $format)
+    {
+        $query = Emargement::query();
+
+        if ($request->filled('date_debut') && $request->filled('date_fin')) {
+            $query->whereBetween('date', [$request->date_debut, $request->date_fin]);
+        }
+
+        $emargements = $query->with(['professeur', 'cours'])->get();
+
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('emargements.export_pdf', compact('emargements'));
+            return $pdf->download('historique_presences.pdf');
+        }
+
+        return redirect()->route('emargements.index');
+    }
+
+    public function exportExel(Request $request, $format)
+    {
+        $query = Emargement::query();
+
+        if ($request->filled('date_debut') && $request->filled('date_fin')) {
+            $query->whereBetween('date', [$request->date_debut, $request->date_fin]);
+        }
+
+        $emargements = $query->with(['professeur', 'cours'])->get();
+
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('emargements.export_pdf', compact('emargements'));
+            return $pdf->download('historique_presences.pdf');
+        }
+
+        if ($format === 'excel') {
+            return Excel::download(new EmargementsExport($request), 'historique_presences.xlsx');
+        }
+
+        return redirect()->route('emargements.index');
     }
 
 

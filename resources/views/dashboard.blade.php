@@ -1,17 +1,57 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Statistiques détaillées sur les présences') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("") }}
-                </div>
+@section('content')
+    <div class="container">
+        <h2 class="mb-4">Tableau de bord</h2>
+
+        @if(session('message'))
+            <div class="alert alert-warning">
+                {{ session('message') }}
+            </div>
+        @endif
+
+        <div class="card">
+            <div class="card-header">Nombre d’émargements par professeur</div>
+            <div class="card-body">
+                @if(count($professeurs) > 0)
+                    <canvas id="emargementChart"></canvas>
+                @else
+                    <p>Aucune donnée disponible.</p>
+                @endif
             </div>
         </div>
     </div>
-</x-app-layout>
+
+    <!-- Inclure Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var ctx = document.getElementById('emargementChart');
+            if (ctx && @json(count($professeurs)) > 0) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: @json($professeurs->pluck('nom')),
+                        datasets: [{
+                            label: 'Nombre d’émargements',
+                            data: @json($professeurs->pluck('total')),
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+@endsection

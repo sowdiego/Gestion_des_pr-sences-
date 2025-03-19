@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CoursController;
@@ -21,6 +22,10 @@ Route::resource('cours', CoursController::class)->middleware('auth');
 
 // Routes pour les utilisateurs (admin)
 Route::resource('users', UserController::class)->middleware('auth');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::get('/emargements/export/{format}', [EmargementController::class, 'export'])->name('emargements.export');
+Route::get('/emargements/exportExel/{format}', [EmargementController::class, 'exportExel'])->name('emargements.exportExel');
 
 // Page d'accueil pour les utilisateurs non connectés
 Route::get('/', function () {
@@ -29,4 +34,4 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [DashboardController::class, 'index'])->name('home');
